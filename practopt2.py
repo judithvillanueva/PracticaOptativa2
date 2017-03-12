@@ -3,26 +3,69 @@
 # vim: set fileencoding=utf8 :
 import urllib2
 import sys
+from bs4 import BeautifulSoup
 
 api_key = None
+nhours = None
 
 
 class WeatherClient(object):
     url_base = "http://api.wunderground.com/api/"
     url_service = {"hourly": "/hourly/q/CA/"}
 
+
     def __init__(self, api_key):
         super(WeatherClient, self).__init__()
         self.api_key = api_key
+        self.temperature = []
+        self.cond = []
+        self.feelslike = []
+        self.hour = []
 
-
+    # busca les caracteristiques de temps de les n hores que volem saber.
     def hourly(self, localition):
-        url = (WeatherClient.url_base + str(self.api_key) + WeatherClient.url_service["hourly"] + localition + ".xml")
+        url = (WeatherClient.url_base + str(self.api_key) + WeatherClient.\
+        url_service["hourly"] + localition + ".xml")
         f = urllib2.urlopen(url)
         data = f.read()
         f.close()
-        return data
 
+        soup = BeautifulSoup(data, 'lxml')
+
+        items = soup.find_all("feelslike")
+        i = 0
+        for item in items:
+            if i < nhours:
+                self.feelslike.append(item.find("metric").text)
+            else:
+                break
+            i = i + 1
+        items = soup.find_all("temp")
+        i = 0
+        for item in items:
+            if i < nhours:
+                self.temperature.append(item.find("metric").text)
+            else:
+                break
+            i = i + 1
+
+        items = soup.find_all("condition")
+        i = 0
+        for item in items:
+            if i < nhours:
+                self.cond.append(item.text)
+            else:
+                break
+            i = i + 1
+
+        items = soup.find_all("hour")
+        i = 0
+        for item in items:
+            if i < nhours:
+                self.hour.append(item.text)
+            else:
+                break
+            i = i + 1
 
 if __name__ == "__main__":
     if not api_key:
@@ -32,6 +75,10 @@ if __name__ == "__main__":
             print "API key must be in CLI option"
             sys.exit(0)
 
+    nhours = int(input("Please, enter how many hours do you want.\n"))
     wc = WeatherClient(api_key)
     page = wc.hourly("Lleida")
-    print page
+    print wc.temperature
+    print wc.cond
+    print wc.feelslike
+    print wc.hour
