@@ -13,7 +13,6 @@ class WeatherClient(object):
     url_base = "http://api.wunderground.com/api/"
     url_service = {"hourly": "/hourly/q/CA/"}
 
-
     def __init__(self, api_key):
         super(WeatherClient, self).__init__()
         self.api_key = api_key
@@ -67,6 +66,14 @@ class WeatherClient(object):
                 break
             i = i + 1
 
+    def impresion(self):
+        for i in range(len(self.temperature)):
+            print "At " + self.hour[i] + " will be " + self.temperature[i] +\
+             " degrees and the feelslike will be " + self.feelslike[i] +\
+             " degrees."
+            print "The sky will be " + self.cond[i] + ".\n"
+
+
 if __name__ == "__main__":
     if not api_key:
         try:
@@ -78,7 +85,4 @@ if __name__ == "__main__":
     nhours = int(input("Please, enter how many hours do you want.\n"))
     wc = WeatherClient(api_key)
     page = wc.hourly("Lleida")
-    print wc.temperature
-    print wc.cond
-    print wc.feelslike
-    print wc.hour
+    wc.impresion()
